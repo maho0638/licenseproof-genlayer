@@ -1,0 +1,46 @@
+name: LicenseProof MANUAL Studionet proof (signed test-network writes)
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Type RUN_LICENSEPROOF_STUDIONET to explicitly authorize deployment and TEST-network writes'
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  studionet-proof:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.confirmation == 'RUN_LICENSEPROOF_STUDIONET' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install official tooling
+        run: python -m pip install -r requirements.txt
+      - name: Required Direct Mode / GenVM preflight
+        run: |
+          python -m compileall -q contracts tests
+          python -m pytest tests/direct -q
+          genvm-lint check contracts/license_proof.py
+          genvm-lint typecheck contracts/license_proof.py
+          genvm-lint schema contracts/license_proof.py
+      - name: Record exact deployed source
+        run: |
+          mkdir -p proof-logs
+          echo "COMMIT=${GITHUB_SHA}" | tee proof-logs/source-identity.txt
+          sha256sum contracts/license_proof.py | tee -a proof-logs/source-identity.txt
+      - name: Signed Studionet deployment, two accounts, reviews, appeal and readback
+        shell: bash
+        run: |
+          set -o pipefail
+          gltest tests/integration/test_studionet.py -v -s --network studionet 2>&1 | tee proof-logs/studionet-proof.log
+      - name: Preserve exact network receipts and proof log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: licenseproof-studionet-${{ github.run_id }}
+          path: proof-logs/
+          if-no-files-found: warn
