@@ -1,0 +1,48 @@
+{
+  "project": "LicenseProof",
+  "network": "GenLayer Studionet (hosted Studio)",
+  "network_is_mainnet": false,
+  "contract_address": "0x223032Eb59C7325DD4FDa4c5c80dFf74C3Cc9b36",
+  "source_commit": "063459b67ad61c86690a00a90bf24fb0eb5eb57f",
+  "source_file": "contracts/license_proof.py",
+  "source_sha256": "1c54ee96981b21f51ccc0ba4aaf8811e599353d43c21cd558ebeda2151ca44f0",
+  "workflow_run_id": 40319154765,
+  "workflow_url": "https://github.com/maho0638/licenseproof-genlayer/actions/runs/40319154765",
+  "workflow_result": "success",
+  "artifact_id": 12648376900,
+  "artifact_name": "licenseproof-studionet-40319154765",
+  "direct_mode_tests": {
+    "passed": 77
+  },
+  "genvm_checks": {
+    "lint": "passed",
+    "typecheck": "passed",
+    "schema": "passed"
+  },
+  "studionet_integration": {
+    "passed": 1,
+    "warning_count": 1,
+    "signed_transactions": 8,
+    "two_distinct_test_accounts": true,
+    "original_decision_unchanged_after_appeal": true,
+    "sha256_readback_matches": true,
+    "revocation_preserves_history": true,
+    "readback_marker": "LICENSEPROOF_NETWORK_READBACK_OK=true"
+  },
+  "transactions": {
+    "publish_license": "0x38ad9e9b0e50e4717a911cde69afa70b692a497d084571a26a86c26000ceaf57",
+    "issue_grant": "0x8a971cabfcdb1e3c4525629496a72ca5b5bce7d4651ed9414db015abea1f2dbd",
+    "accept_grant": "0x6c677f57d76afdc72476c8c0d89441bc44447035d0cacd8e7fecb4a2eff926f7",
+    "file_usage": "0xc5095e080d9c1cfa32fe94c48eddb8041b2003a81b873d0b282d10b34dc79687",
+    "evaluate_usage": "0x09f6dca6eb0852af1adf6e3b64d6b0b0f22b858d276f3bef182d465bb998e0e0",
+    "file_appeal": "0xa80b4ea49751c1293200c0506942b2c9372200a7e667ff7ea21779e14ad0fbab",
+    "resolve_appeal": "0xf69ed621e54004029de508a7b5a4a85e1624bc2955095bd09864c7ef538f61d4",
+    "revoke_grant": "0x66bfa9f5870a177f82aeb5c5ee0b9c8bbe7394445c6a54edb87231926b7a8dcc"
+  },
+  "limitations": [
+    "Studionet is a test environment, not production mainnet.",
+    "LLM verdicts classify self-reported claims, not verified real-world licensing facts.",
+    "No external security audit or mathematical/formal proof of all possible behavior.",
+    "No assets, token escrow or royalties are handled."
+  ]
+}
