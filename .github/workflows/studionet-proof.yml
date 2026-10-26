@@ -1,5 +1,7 @@
 name: LicenseProof MANUAL Studionet proof (signed test-network writes)
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       confirmation:
@@ -10,7 +12,7 @@ permissions:
   contents: read
 jobs:
   studionet-proof:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.confirmation == 'RUN_LICENSEPROOF_STUDIONET' }}
+    if: ${{ (github.event_name == 'push' && github.event.head_commit.message == 'RUN_ONCE_LICENSEPROOF_STUDIONET_PROOF') || (github.event_name == 'workflow_dispatch' && inputs.confirmation == 'RUN_LICENSEPROOF_STUDIONET') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 75
     steps:
