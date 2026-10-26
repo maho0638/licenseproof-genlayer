@@ -1,0 +1,29 @@
+name: LicenseProof GenLayer Direct Mode and GenVM checks
+on:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install official GenLayer tooling
+        run: python -m pip install -r requirements.txt
+      - name: Python syntax
+        run: python -m compileall -q contracts tests
+      - name: Official GenLayer Direct Mode tests
+        run: python -m pytest tests/direct -q
+      - name: GenVM lint
+        run: genvm-lint check contracts/license_proof.py
+      - name: GenVM typecheck
+        run: genvm-lint typecheck contracts/license_proof.py
+      - name: GenVM schema
+        run: genvm-lint schema contracts/license_proof.py
+      - name: Source checksum
+        run: sha256sum contracts/license_proof.py
