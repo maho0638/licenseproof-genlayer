@@ -4,6 +4,7 @@ Real network consensus and evidence authenticity are explicitly NOT established 
 import hashlib
 import json
 import pytest
+from genlayer import Address
 
 CONTRACT = "contracts/license_proof.py"
 PROMPT = r"(?s).*CLAIM CONSISTENCY reviewer.*"
@@ -18,7 +19,7 @@ def new(vm, deploy, issuer, recipient, stage="created"):
     vm.sender = issuer
     c = deploy(CONTRACT)
     c.publish_license("LIC1", "Original artwork", "Streaming allowed with attribution. Resale prohibited.")
-    c.issue_grant("G1", "LIC1", recipient.as_hex, "Publish in one credited video.")
+    c.issue_grant("G1", "LIC1", Address(recipient).as_hex, "Publish in one credited video.")
     if stage in ("accepted", "reported", "reviewed"):
         vm.sender = recipient
         c.accept_grant("G1")
@@ -59,7 +60,7 @@ def test_recipient_cannot_issue_grant(direct_vm, direct_deploy, direct_alice, di
     c = new(direct_vm, direct_deploy, direct_alice, direct_bob)
     direct_vm.sender = direct_bob
     with direct_vm.expect_revert("Only issuer may grant"):
-        c.issue_grant("G2", "LIC1", direct_bob.as_hex, "Further use")
+        c.issue_grant("G2", "LIC1", Address(direct_bob).as_hex, "Further use")
 
 
 def test_recipient_cannot_revoke(direct_vm, direct_deploy, direct_alice, direct_bob):
@@ -143,7 +144,7 @@ def test_duplicate_license_rejected(direct_vm, direct_deploy, direct_alice, dire
 def test_duplicate_grant_rejected(direct_vm, direct_deploy, direct_alice, direct_bob):
     c = new(direct_vm, direct_deploy, direct_alice, direct_bob)
     with direct_vm.expect_revert("Grant already exists"):
-        c.issue_grant("G1", "LIC1", direct_bob.as_hex, "New scope")
+        c.issue_grant("G1", "LIC1", Address(direct_bob).as_hex, "New scope")
 
 
 def test_duplicate_accept_rejected(direct_vm, direct_deploy, direct_alice, direct_bob):
@@ -206,14 +207,14 @@ def test_hashes_and_recipient_binding(direct_vm, direct_deploy, direct_alice, di
     direct_vm.sender = direct_alice
     c = direct_deploy(CONTRACT)
     c.publish_license("L1", "  Özgün tasarım  ", "  Personal use only  ")
-    c.issue_grant("G1", "L1", direct_bob.as_hex, "  Individual study  ")
+    c.issue_grant("G1", "L1", Address(direct_bob).as_hex, "  Individual study  ")
     lic = json.loads(c.get_license("L1"))
     grant = json.loads(c.get_grant("G1"))
     assert lic["terms"] == "Personal use only"
     assert lic["terms_sha256"] == hashlib.sha256(b"Personal use only").hexdigest()
     assert grant["terms_sha256"] == lic["terms_sha256"]
     assert grant["scope_sha256"] == hashlib.sha256(b"Individual study").hexdigest()
-    assert grant["licensee"].lower() == direct_bob.as_hex.lower()
+    assert grant["licensee"].lower() == Address(direct_bob).as_hex.lower()
 
 
 def test_appeal_combined_evidence_digest(direct_vm, direct_deploy, direct_alice, direct_bob):
@@ -301,7 +302,7 @@ def test_invalid_scope(direct_vm, direct_deploy, direct_alice, direct_bob, bad):
     c = direct_deploy(CONTRACT)
     c.publish_license("L", "Asset", "Terms")
     with direct_vm.expect_revert("Invalid grant scope"):
-        c.issue_grant("G", "L", direct_bob.as_hex, bad)
+        c.issue_grant("G", "L", Address(direct_bob).as_hex, bad)
 
 
 @pytest.mark.parametrize("bad", ["", " ", "\x03", "D"*1201])
@@ -352,7 +353,7 @@ def test_missing_resources_revert(direct_vm, direct_deploy, direct_alice):
 
 def test_grants_are_isolated(direct_vm, direct_deploy, direct_alice, direct_bob):
     c = new(direct_vm, direct_deploy, direct_alice, direct_bob)
-    c.issue_grant("G2", "LIC1", direct_bob.as_hex, "Only podcasts.")
+    c.issue_grant("G2", "LIC1", Address(direct_bob).as_hex, "Only podcasts.")
     direct_vm.sender = direct_bob
     c.accept_grant("G2")
     c.file_usage("G2", "Podcast used", "Self-reported")
@@ -366,7 +367,7 @@ def test_maximum_lengths_supported(direct_vm, direct_deploy, direct_alice, direc
     direct_vm.sender = direct_alice
     c = direct_deploy(CONTRACT)
     c.publish_license("l"*48, "a"*120, "t"*1600)
-    c.issue_grant("g"*48, "l"*48, direct_bob.as_hex, "s"*1200)
+    c.issue_grant("g"*48, "l"*48, Address(direct_bob).as_hex, "s"*1200)
     direct_vm.sender = direct_bob
     c.accept_grant("g"*48)
     c.file_usage("g"*48, "d"*1200, "e"*2000)
